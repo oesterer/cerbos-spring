@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: cerbos-spring-demo
+
+cerbos:
+  authorization:
+    target: localhost:3593
+    plaintext: true
+    resource-kind: document

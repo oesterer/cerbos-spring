@@ -1,0 +1,72 @@
+{
+  "groups": [
+    {
+      "name": "cerbos.authorization",
+      "type": "dev.cerbos.spring.CerbosAuthorizationProperties",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "cerbos.authorization.headers",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties"
+    },
+    {
+      "name": "cerbos.authorization.insecure",
+      "type": "java.lang.Boolean",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "cerbos.authorization.method-actions",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties"
+    },
+    {
+      "name": "cerbos.authorization.plaintext",
+      "type": "java.lang.Boolean",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "cerbos.authorization.playground-instance",
+      "type": "java.lang.String",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties"
+    },
+    {
+      "name": "cerbos.authorization.policy-version",
+      "type": "java.lang.String",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties"
+    },
+    {
+      "name": "cerbos.authorization.principal-scope",
+      "type": "java.lang.String",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties"
+    },
+    {
+      "name": "cerbos.authorization.resource-kind",
+      "type": "java.lang.String",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties",
+      "defaultValue": "http_request"
+    },
+    {
+      "name": "cerbos.authorization.resource-scope",
+      "type": "java.lang.String",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties"
+    },
+    {
+      "name": "cerbos.authorization.target",
+      "type": "java.lang.String",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties",
+      "defaultValue": "localhost:3593"
+    },
+    {
+      "name": "cerbos.authorization.timeout",
+      "type": "java.time.Duration",
+      "sourceType": "dev.cerbos.spring.CerbosAuthorizationProperties",
+      "defaultValue": "1s"
+    }
+  ],
+  "hints": []
+}

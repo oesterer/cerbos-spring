@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: dev.cerbos.spring.CerbosEvaluationServiceTest
+-------------------------------------------------------------------------------
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.304 s -- in dev.cerbos.spring.CerbosEvaluationServiceTest
