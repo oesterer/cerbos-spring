@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: cerbos-spring-demo
+
+cerbos:
+  pdp:
+    target: localhost:3593
+    plaintext: true
+  http:
+    resource-kind: http_request
