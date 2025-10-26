@@ -1,2 +1,6 @@
-.m2
-resume
+# Maven build outputs
+/target/
+**/target/
+
+# Local Maven repository used during sandboxed builds
+/.m2/

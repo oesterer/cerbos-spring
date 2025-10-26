@@ -1,8 +1,0 @@
-/Users/aoesterer/Code/cerbos-spring/cerbos-spring-authorization/src/main/java/dev/cerbos/spring/CerbosAuthorizationProperties.java
-/Users/aoesterer/Code/cerbos-spring/cerbos-spring-authorization/src/main/java/dev/cerbos/spring/CerbosAuthorizationRequestFactory.java
-/Users/aoesterer/Code/cerbos-spring/cerbos-spring-authorization/src/main/java/dev/cerbos/spring/DefaultHttpCerbosRequestFactory.java
-/Users/aoesterer/Code/cerbos-spring/cerbos-spring-authorization/src/main/java/dev/cerbos/spring/CerbosAttributeValueConverter.java
-/Users/aoesterer/Code/cerbos-spring/cerbos-spring-authorization/src/main/java/dev/cerbos/spring/CerbosAuthorizationManager.java
-/Users/aoesterer/Code/cerbos-spring/cerbos-spring-authorization/src/main/java/dev/cerbos/spring/CerbosEvaluationRequest.java
-/Users/aoesterer/Code/cerbos-spring/cerbos-spring-authorization/src/main/java/dev/cerbos/spring/CerbosAuthorizationAutoConfiguration.java
-/Users/aoesterer/Code/cerbos-spring/cerbos-spring-authorization/src/main/java/dev/cerbos/spring/CerbosEvaluationService.java

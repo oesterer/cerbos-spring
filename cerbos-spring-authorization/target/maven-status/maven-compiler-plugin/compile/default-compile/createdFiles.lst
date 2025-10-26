@@ -1,9 +1,0 @@
-META-INF/spring-configuration-metadata.json
-dev/cerbos/spring/CerbosAttributeValueConverter.class
-dev/cerbos/spring/DefaultHttpCerbosRequestFactory.class
-dev/cerbos/spring/CerbosEvaluationRequest.class
-dev/cerbos/spring/CerbosAuthorizationManager.class
-dev/cerbos/spring/CerbosAuthorizationAutoConfiguration.class
-dev/cerbos/spring/CerbosAuthorizationProperties.class
-dev/cerbos/spring/CerbosEvaluationService.class
-dev/cerbos/spring/CerbosAuthorizationRequestFactory.class
