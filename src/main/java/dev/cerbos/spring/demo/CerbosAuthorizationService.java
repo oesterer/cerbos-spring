@@ -32,26 +32,37 @@ public class CerbosAuthorizationService {
     }
 
     public boolean isAllowed(Authentication authentication, HttpServletRequest request) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
-        }
-        String principalId = authentication.getName();
-        List<String> roles = extractRoles(authentication.getAuthorities());
-        Principal principal = Principal.newInstance(principalId, roles.toArray(String[]::new));
-        Map<String, Object> principalAttrs = buildPrincipalAttributes(authentication, roles);
-        principal.withAttributes(AttributeValueConverter.fromObjectMap(principalAttrs));
-
         CerbosProperties.Http httpConfig = properties.getHttp();
         String action = httpConfig.resolveAction(request.getMethod());
         String resourceKind = httpConfig.getResourceKind();
+        Map<String, Object> resourceAttributes = buildResourceAttributes(request);
+        return checkPermission(authentication, resourceKind, request.getRequestURI(), action, resourceAttributes, Map.of());
+    }
 
-        ResourceAction resource = ResourceAction.newInstance(resourceKind, request.getRequestURI());
-        resource.withAttributes(AttributeValueConverter.fromObjectMap(buildResourceAttributes(request)));
+    public boolean checkPermission(
+            Authentication authentication,
+            String resourceKind,
+            String resourceId,
+            String action,
+            Map<String, Object> resourceAttributes,
+            Map<String, Object> principalAttributes) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        List<String> roles = extractRoles(authentication.getAuthorities());
+        Principal principal = Principal.newInstance(authentication.getName(), roles.toArray(String[]::new));
+        Map<String, Object> mergedPrincipalAttrs = buildPrincipalAttributes(authentication, roles, principalAttributes);
+        principal.withAttributes(AttributeValueConverter.fromObjectMap(mergedPrincipalAttrs));
+
+        ResourceAction resource = ResourceAction.newInstance(resourceKind, resourceId);
+        Map<String, Object> safeResourceAttributes = resourceAttributes != null ? resourceAttributes : Map.of();
+        resource.withAttributes(AttributeValueConverter.fromObjectMap(safeResourceAttributes));
         resource.withActions(action);
 
         try {
             CheckResourcesResult result = client.batch(principal).addResources(resource).check();
-            return result.find(request.getRequestURI())
+            return result.find(resourceId)
                     .map(checkResult -> checkResult.isAllowed(action))
                     .orElse(false);
         } catch (RuntimeException ex) {
@@ -60,7 +71,8 @@ public class CerbosAuthorizationService {
         }
     }
 
-    private Map<String, Object> buildPrincipalAttributes(Authentication authentication, List<String> roles) {
+    private Map<String, Object> buildPrincipalAttributes(
+            Authentication authentication, List<String> roles, Map<String, Object> additionalAttributes) {
         Map<String, Object> attributes = new LinkedHashMap<>();
         attributes.put("roles", roles);
         if (authentication.getPrincipal() instanceof UserDetails userDetails) {
@@ -68,6 +80,9 @@ public class CerbosAuthorizationService {
             attributes.put("accountNonLocked", userDetails.isAccountNonLocked());
             attributes.put("credentialsNonExpired", userDetails.isCredentialsNonExpired());
             attributes.put("enabled", userDetails.isEnabled());
+        }
+        if (additionalAttributes != null && !additionalAttributes.isEmpty()) {
+            attributes.putAll(additionalAttributes);
         }
         return attributes;
     }

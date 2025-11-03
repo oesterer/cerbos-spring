@@ -1,69 +1,69 @@
 # Cerbos Spring Boot Demo
 
 This project shows how to wire the [Cerbos Java SDK](https://github.com/cerbos/cerbos-sdk-java) into a Spring Boot
-application so every protected HTTP request is authorized by a Cerbos Policy Decision Point (PDP).
+application so both HTTP requests and business-layer methods are authorised by a Cerbos Policy Decision Point (PDP).
 
-## What the sample contains
+## Architecture
 
-- **Cerbos client configuration** — `CerbosClientConfiguration` bootstraps a `CerbosBlockingClient` from typed
-  properties (`cerbos.pdp.*`). It supports plaintext, insecure TLS, custom timeouts and Cerbos Playground targets.
-- **HTTP request to Cerbos mapping** — `CerbosAuthorizationService` converts Spring Security `Authentication` and the
-  current `HttpServletRequest` into Cerbos principals/resources, attaches rich attributes (roles, headers, path
-  segments, etc.), calls the Cerbos PDP and translates the decision back to Spring.
-- **Custom AuthorizationManager** — `CerbosAuthorizationManager` plugs Cerbos into Spring Security’s authorization
-  pipeline so all protected routes defer to the PDP.
-- **Security setup** — `SecurityConfiguration` protects every endpoint except `/public/**` and `/actuator/health`, keeps
-  an in-memory user store (`alice`/`password`, `bob`/`password`) and enables both form login and HTTP Basic.
-- **REST controllers** — `DocumentController` (protected) and `PublicController` (public) provide concrete URLs you can
-  exercise.
-- **Tests** — focused unit tests for the authorization service/manager plus a MockMvc integration test that demonstrates
-  allow/deny flows with mocked Cerbos responses.
+- **Cerbos client configuration** – `CerbosClientConfiguration` bootstraps a `CerbosBlockingClient` using typed
+  properties (`cerbos.pdp.*`). Plaintext and insecure TLS modes plus custom timeouts and Playground targets are
+  supported out of the box.
+- **HTTP-level guard** – `CerbosAuthorizationService` still maps `Authentication` + `HttpServletRequest` data to Cerbos
+  principals/resources so the custom `CerbosAuthorizationManager` can protect the servlet layer.
+- **Business services** – `DocumentService` encapsulates domain logic for reading and creating documents, delegating to
+  a simple in-memory `DocumentRepository`.
+- **Method security via Cerbos** – `CerbosMethodAuthorizer` exposes bean methods that invoke Cerbos; `DocumentService`
+  uses `@PreAuthorize` and `@PostAuthorize` to call those methods, guaranteeing Cerbos signs off either before or after
+  the business logic executes.
+- **REST controllers** – `DocumentController` delegates to the service layer, while `PublicController` exposes a Cerbos-
+  free endpoint for comparison.
+- **Tests** – Mockito-based unit tests exercise the HTTP authorisation components, and `SecurityIntegrationTest` drives
+  MockMvc through allow/deny flows covering both HTTP-level and method-level Cerbos checks.
 
-## Authorization scenarios demonstrated
+## Authorisation scenarios demonstrated
 
-1. **Public resources** (`GET /public/info`) bypass Cerbos and are always allowed.
-2. **Protected read** (`GET /documents/{id}`) — Cerbos evaluates whether the caller can perform a `read` action on the
-   HTTP resource identified by the request URI.
-3. **Protected create** (`POST /documents`) — Cerbos checks the `create` action before the request body is processed.
-4. **Cerbos allow** — when the PDP grants the action, the controller executes and returns business data.
-5. **Cerbos deny** — the authorization manager converts a PDP denial into HTTP 403 without entering the controller.
-6. **Cerbos failure** — network/runtime errors from the PDP surface as 403 responses via `AccessDeniedException`, keeping
-   the app secure by default.
+1. **Public resource** – `GET /public/info` bypasses Cerbos and always succeeds.
+2. **HTTP-level allow/deny** – `CerbosAuthorizationManager` queries Cerbos before the request reaches the controller.
+3. **Method-level pre-check** – `@PreAuthorize` on `DocumentService#createDocument` calls Cerbos to vet create
+   operations before any data is persisted.
+4. **Method-level post-check** – `@PostAuthorize` on `DocumentService#readDocument` asks Cerbos to approve the returned
+   document, enabling row-level decisions once business attributes are known.
+5. **Failure handling** – network/runtime errors from the PDP are surfaced as `AccessDeniedException`, keeping responses
+   secure-by-default.
 
 ## Running the application
 
-1. Make sure a Cerbos PDP is reachable at the address in `src/main/resources/application.yml` (default
-   `localhost:3593`). You can swap in a Playground endpoint or change the host/port via
-   `--cerbos.pdp.target=<host:port>`.
+1. Ensure a Cerbos PDP is reachable at `cerbos.pdp.target` (defaults to `localhost:3593`). A Playground endpoint can be
+   used instead by pointing the property at the generated host:port.
 2. Start the app:
    ```bash
    mvn spring-boot:run
    ```
-3. Test endpoints:
+3. Exercise the endpoints:
    ```bash
    curl -i http://localhost:8080/public/info
    curl -i -u alice:password http://localhost:8080/documents/alpha
+   curl -i -u alice:password -H 'Content-Type: application/json' \
+     -d '{"documentId":"proposal","content":{"title":"Proposal"}}' \
+     http://localhost:8080/documents
    ```
-   Expect `200 OK` for public routes. Protected routes return `200 OK` when Cerbos allows the action or `403 Forbidden`
-   otherwise.
+   Successful Cerbos evaluations return `200 OK` for reads or `201 Created` for writes; denied actions result in `403 Forbidden`.
 
 ## Customising
 
-- Update `application.yml` to change PDP target, resource kind and HTTP method→action mapping.
-- Replace the in-memory users in `SecurityConfiguration` with your own `UserDetailsService`.
-- Extend `CerbosAuthorizationService` if you need additional principal/resource attributes (e.g. organisation IDs,
-  feature flags, request body fields).
-- For batch or plan queries, call `client.batch(...)`/`client.plan(...)` inside the authorization service the same way.
+- Tweak `application.yml` for PDP settings, HTTP method→action mapping, or to point at a different Cerbos instance.
+- Replace the in-memory users in `SecurityConfiguration` with your own `UserDetailsService` implementation.
+- Extend `CerbosMethodAuthorizer` to add more domain-specific checks (e.g., update/delete actions, additional resource
+  attributes).
+- Swap the in-memory `DocumentRepository` for a database-backed implementation; the method security stays unchanged.
 
 ## Running tests
 
-The test suite uses Mockito to mock the Cerbos client and MockMvc for security flows:
 ```bash
 mvn test
 ```
-(First run requires internet access so Maven can download dependencies.)
+(First run requires Internet access so Maven can download dependencies from Maven Central.)
 
 ## License
 
 This example is provided without an explicit license; adapt it to your needs.
-=======
